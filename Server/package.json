@@ -1,7 +1,7 @@
 {
-  "name": "vynter-scraper",
+  "name": "semester-project",
   "version": "1.0.0",
-  "description": "Backend scraper for vinter",
+  "description": "Semester project 2 RUC",
   "main": "index.js",
   "scripts": {
     "build": "tsoa spec-and-routes && npx tsc",
