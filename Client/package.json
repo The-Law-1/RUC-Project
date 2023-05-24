@@ -14,8 +14,10 @@
         "@headlessui/vue": "^1.7.11",
         "@heroicons/vue": "^2.0.16",
         "@vueuse/core": "^9.13.0",
+        "chart.js": "^4.3.0",
         "pinia": "^2.0.32",
         "vue": "^3.2.45",
+        "vue-chartjs": "^5.2.0",
         "vue-router": "^4.1.6"
     },
     "devDependencies": {
