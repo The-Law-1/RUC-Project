@@ -13,7 +13,9 @@ module.exports = {
               'gunmetal': '#2C3539', // this is the trashiest name I've ever seen for a colour
               'paper': "#FFF2D7", // this is coffee cream
               'sky': "#A7D8E7", // this is sky blue
-              'sky2': "#B9E9FC"
+              'sky2': "#B9E9FC",
+              "green": "#226F54",
+              "cream": "#F4F0BB"
           },
         
           // that is animation class
