@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import indexVue from "@/pages/index.vue";
 import defaultLayout from "@/layouts/default.vue";
+import AirQualityVue from "@/pages/AirQuality.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -13,6 +14,14 @@ const router = createRouter({
         layout: defaultLayout,
       },
     },
+    {
+        path: "/quality",
+        name: "quality",
+        component: AirQualityVue,
+        meta: {
+            layout: defaultLayout,
+        },
+    }
   ],
 });
 
