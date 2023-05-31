@@ -1,47 +1,143 @@
-# Server template Express + TS + MongoDB
+Steps to install and run MariaDB on your Raspberry Pi:
 
-## Description
+1. Update the system: Start by updating your Raspberry Pi's system packages to ensure you have the latest software.
 
-This is a template for a server using Express, Typescript and MongoDB. It is intended to be used as a starting point for a new project.
+   ```shell
+   sudo apt update
+   sudo apt upgrade
+   ```
 
-## Architecture
+2. Install MariaDB Server: Use the following command to install the MariaDB Server package.
 
-The server is built using Express and Typescript. It uses MongoDB as a database. The server uses Controllers to handle the requests and Services to handle the business logic.
+   ```shell
+   sudo apt install mariadb-server-10.0
+   ```
 
-For use with Mongo, create Models in the models folder, these cannot be used as types, so if needed, create a class and use it for typing. I also recommend making interfaces for forms in creation and update requests for example.
+   During the installation process, you will be prompted to set a root password for the MariaDB Server.
 
-## Environment
+3. Secure the MariaDB installation: After the installation is complete, you can run the secure installation script to enhance the security of your MariaDB installation.
 
-Place the following variables in a .env file in the root of the project:
+   ```shell
+   sudo mysql_secure_installation
+   ```
 
-```bash
-PORT=... # Port where the server will run
-SERVER_HOST=... # Host where the server will run
-MONGO_HOST=... # Host where the mongo database will run, localhost or RPI IP
-MONGO_ROOT_USERNAME=... # Username for the root user
-MONGO_ROOT_PASSWORD=... # Password for the root user
-MONGO_ADMIN_USERNAME=... # Username for the admin user (used by mongo express)
-MONGO_ADMIN_PASSWORD=... # Password for the admin user (used by mongo express)
-```
+   Follow the prompts to set up the security options for your MariaDB Server.
 
-## Development
+4. Start the MariaDB service: Once the installation and configuration are done, start the MariaDB service.
 
-To build the routes and documentation from the controller classes, run the following command:
+   ```shell
+   sudo systemctl start mysql
+   ```
 
-```bash
-npm run predev
-```
+   You can also enable the service to start automatically on boot:
 
-Then you can run the server with:
+   ```shell
+   sudo systemctl enable mysql
+   ```
 
-```bash
-npm run dev
-```
+5. Access MariaDB: To access the MariaDB command-line interface, use the following command:
 
-## Notes
+   ```shell
+   sudo mysql
+   ```
 
-When running this mongo configuration in raspberry pi you want to use the mongo:bionic image. The mongo:latest image is not compatible with the raspberry pi architecture.
+   You can now execute SQL commands and interact with the MariaDB server.
 
-## Documentation
+---
 
-https://tsoa-community.github.io/docs
+In order to connect remotely, you have to have MySQL bind port 3306 to your machine's IP address in my.cnf. Then you have to have created the user in both localhost and '%' wildcard and grant permissions on all DB's as such . See below:
+
+__my.cnf (my.ini on windows)__
+
+1. Replace localhost adress
+   ```SQL
+    bind-address = 0.0.0.0
+   ```
+
+2. Then create a user:
+   ```SQL
+    CREATE USER 'myuser'@'%' IDENTIFIED BY 'mypass';
+   ```
+
+3. Then grant the new user access and privileges:
+   ```SQL
+    GRANT ALL ON *.* TO 'myuser'@'%';
+    FLUSH PRIVILEGES;
+   ```
+
+Depending on your OS, you may have to open port 3306 to allow remote connections.
+
+---
+
+If you want to connect to MariaDB using JavaScript (JS) instead of Python, you can use the `mysql` module in Node.js. Here's an example of how you can connect to MariaDB from a JavaScript file:
+
+1. Install the required packages: Start by initializing a Node.js project in your desired directory and install the `mysql` package using npm.
+
+   ```shell
+   mkdir myproject
+   cd myproject
+   npm init -y
+   npm install mysql
+   ```
+
+2. Create a JavaScript file: Create a new file, for example, `app.js`, and open it in a text editor.
+
+   ```shell
+   touch app.js
+   nano app.js
+   ```
+
+3. Connect to MariaDB: Use the following code as an example to establish a connection with MariaDB and perform database operations.
+
+   ```javascript
+   const mysql = require('mysql');
+
+    // Create a connection
+    const connection = mysql.createConnection({
+        host: '192.168.1.111',
+        user: 'admin',
+        password: 'admin',
+        database: 'air_quality_monitor',
+    });
+
+    // Connect to MariaDB
+    connection.connect((error) => {
+        if (error) {
+            console.error('Error connecting to MariaDB:', error);
+            return;
+        }
+        console.log('Connected to MariaDB!');
+
+        // Perform database operations
+        // Example: Execute a SQL query
+        connection.query('SELECT * FROM measurements', (error, results) => {
+        if (error) {
+        console.error('Error executing query:', error);
+        return;
+        }
+        console.log('Query results:', results);
+
+        // Close the connection when finished with operations
+        connection.end((error) => {
+        if (error) {
+            console.error('Error closing connection:', error);
+            return;
+        }
+        console.log('Connection closed.');
+        });
+    });
+    });
+
+   ```
+
+   Make sure to modify the connection parameters (host, user, password, and database) according to your specific MariaDB setup.
+
+5. Run the JavaScript file: Save the `app.js` file and run it using Node.js.
+
+   ```shell
+   node app.js
+   ```
+
+   You should see the connection status and any query results printed to the console.
+
+With these steps, you can connect to MariaDB using JavaScript (Node.js) and perform database operations from your Raspberry Pi.
