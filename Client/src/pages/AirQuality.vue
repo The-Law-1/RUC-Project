@@ -6,8 +6,9 @@
 
     <div class="mt-12 text-2xl">
         Your air quality score:
-        <div>
+        <div v-if="dummyIAQValues">
             <!-- Score -->
+            {{dummyIAQValues[dummyIAQValues.length - 1].value}}
         </div>
         <hr/>
     </div>
@@ -33,6 +34,15 @@
                 Temperature
             </div>
             <!-- Graphique Temperature -->
+            <div class="w-full">
+                <Bar
+                    id="Temp-chart"
+                    :options="{
+                        responsive: true
+                    }"
+                    :data="tempData"
+                />
+            </div>
         </div>
 
         <div>
@@ -40,6 +50,15 @@
                 Humidity
             </div>
             <!-- Graphique Humidity -->
+            <div class="w-full">
+                <Bar
+                    id="Humidity-chart"
+                    :options="{
+                        responsive: true
+                    }"
+                    :data="humidityData"
+                />
+            </div>
         </div>
 
         <div>
@@ -47,6 +66,15 @@
                 Pressure
             </div>
             <!-- Graphique Pressure -->
+            <div class="w-full">
+                <Bar
+                    id="Pressure-chart"
+                    :options="{
+                        responsive: true
+                    }"
+                    :data="pressureData"
+                />
+            </div>
         </div>
     </div>
 </template>
@@ -55,39 +83,85 @@
 import { ref, defineComponent } from 'vue';
 import type { QualityTimestamp } from "@/types/QualityTimestamp";
 import { Bar } from 'vue-chartjs'
-import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
-  
+import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
+import sample_temp from "@/sample_data/temp.json";
+import sample_co2 from "@/sample_data/co2.json";
+import sample_humidity from "@/sample_data/humidity.json";
+import sample_pressure from "@/sample_data/pressure.json";
+import sample_iaq from "@/sample_data/iaq.json";
+
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
 var dummyCO2Values = ref([] as QualityTimestamp[]);
+var dummyTempValues = ref([] as QualityTimestamp[]);
+var dummyHumidityValues = ref([] as QualityTimestamp[]);
+var dummyPressureValues = ref([] as QualityTimestamp[]);
 
-var minutesInterval = 10;
+var dummyIAQValues = ref([] as QualityTimestamp[]);
+dummyIAQValues.value = JSON.parse(JSON.stringify(sample_iaq));
+dummyIAQValues.value.map((value) => {
+    value.time = new Date(value.time);
+    return value;
+});
 
-// fill array with dummy values, taken every *minutesInterval* minutes
-for (let i = 0; i < 24 * 60; i += minutesInterval) {
-    dummyCO2Values.value.push({
-        // midnight of may 1st + minute values i
-        date: new Date(2023, 5, 1, 0, i),
-        value: Math.floor(Math.random() * 100)
+dummyTempValues.value = JSON.parse(JSON.stringify(sample_temp));
+dummyTempValues.value.map((value) => {
+    value.time = new Date(value.time);
+    return value;
+});
+
+dummyCO2Values.value = JSON.parse(JSON.stringify(sample_co2));
+dummyCO2Values.value.map((value) => {
+    value.time = new Date(value.time);
+    return value;
+});
+
+dummyHumidityValues.value = JSON.parse(JSON.stringify(sample_humidity));
+dummyHumidityValues.value.map((value) => {
+    value.time = new Date(value.time);
+    return value;
+});
+
+dummyPressureValues.value = JSON.parse(JSON.stringify(sample_pressure));
+dummyPressureValues.value.map((value) => {
+    value.time = new Date(value.time);
+    return value;
+});
+
+
+const getChartData = (valuesArray: QualityTimestamp[], chartLabel:string, lowRange: number, highRange: number, lowColor: string, highColor: string) => {
+    const labels = valuesArray.map((value) => value.time.toLocaleTimeString());
+    // array of colours from values, red if value is < 25 or > 75, green if not
+
+    const colors = valuesArray.map((value) => {
+        if (value.value < lowRange) {
+            return lowColor;
+        } else if (value.value > highRange) {
+            return highColor;
+        } else {
+            // return green by default
+            return '#41b883';
+        }
     });
+
+    const datasets = [
+        {
+            label: chartLabel,
+            data: valuesArray.map((value) => value.value),
+            backgroundColor: colors
+        }
+    ];
+
+    return {
+        labels,
+        datasets,
+    }
 }
 
-// extract a labels array and datasets array
-const labels = dummyCO2Values.value.map((value) => value.date.toLocaleTimeString());
-// array of colours from values, red if value is < 25 or > 75, green if not
-const colors = dummyCO2Values.value.map((value) => value.value < 25 || value.value > 75 ? '#f87979' : '#41b883');
-const datasets = [
-    {
-        label: 'CO2',
-        data: dummyCO2Values.value.map((value) => value.value),
-        backgroundColor: colors
-    }
-];
-
-const CO2Data = ref({
-    labels,
-    datasets,
-});
+const CO2Data = ref(getChartData(dummyCO2Values.value, 'CO2', 0, 1000, '#f87979', '#f87979'));
+const tempData = ref(getChartData(dummyTempValues.value, 'Temperature', 12, 30, '#f87979', '#f87979'));
+const humidityData = ref(getChartData(dummyHumidityValues.value, 'Humidity', 30, 60, '#f87979', '#f87979'));
+const pressureData = ref(getChartData(dummyPressureValues.value, 'Pressure', 0, 10000, '#f87979', '#f87979'));
 
 export default defineComponent({
   name: 'AirQualityPage',
@@ -95,7 +169,11 @@ export default defineComponent({
     setup() {
         return {
         dummyCO2Values,
-        CO2Data
+        CO2Data,
+        tempData,
+        humidityData,
+        pressureData,
+        dummyIAQValues
         }
     }
 });
