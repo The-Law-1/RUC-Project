@@ -6,12 +6,28 @@
 
     <div class="mt-12 text-2xl">
         Your air quality score:
-        <div v-if="dummyIAQValues">
+        <div v-if="dummyIAQValues" class="underline">
             <!-- Score -->
             {{dummyIAQValues[dummyIAQValues.length - 1].value}}
         </div>
         <hr/>
     </div>
+
+    <div class="text-2xl">
+        The current outdoor temperature is:
+        <span class=" underline">
+            {{ weather }} C°
+        </span>
+        <div v-if="weather > tempData.datasets[0].data[tempData.datasets[0].data.length - 1]">
+            The outside temperature is warmer than indoors,<br/> close your windows to cool down your room.
+        </div>
+        <div v-else>
+            The indoor temperature is warmer than outdoors,<br/> open your windows to cool down your room.
+        </div>
+        <hr/>
+    </div>
+
+
     <div class="grid grid-cols-2 space-y-10 ">
         <div>
             <div class=" text-2xl">
@@ -80,7 +96,7 @@
 </template>
 
 <script lang="ts">
-import { ref, defineComponent } from 'vue';
+import { ref, defineComponent, onMounted } from 'vue';
 import type { QualityTimestamp } from "@/types/QualityTimestamp";
 import { Bar } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
@@ -89,6 +105,7 @@ import sample_co2 from "@/sample_data/co2.json";
 import sample_humidity from "@/sample_data/humidity.json";
 import sample_pressure from "@/sample_data/pressure.json";
 import sample_iaq from "@/sample_data/iaq.json";
+import { useWeatherStore } from '@/stores/weather';
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
@@ -96,6 +113,10 @@ var dummyCO2Values = ref([] as QualityTimestamp[]);
 var dummyTempValues = ref([] as QualityTimestamp[]);
 var dummyHumidityValues = ref([] as QualityTimestamp[]);
 var dummyPressureValues = ref([] as QualityTimestamp[]);
+
+var weatherStore = null;
+
+let weather = ref(0);
 
 var dummyIAQValues = ref([] as QualityTimestamp[]);
 dummyIAQValues.value = JSON.parse(JSON.stringify(sample_iaq));
@@ -163,6 +184,8 @@ const tempData = ref(getChartData(dummyTempValues.value, 'Temperature', 12, 30, 
 const humidityData = ref(getChartData(dummyHumidityValues.value, 'Humidity', 30, 60, '#f87979', '#f87979'));
 const pressureData = ref(getChartData(dummyPressureValues.value, 'Pressure', 0, 10000, '#f87979', '#f87979'));
 
+console.log(tempData.value);
+
 export default defineComponent({
   name: 'AirQualityPage',
   components: { Bar },
@@ -173,9 +196,17 @@ export default defineComponent({
         tempData,
         humidityData,
         pressureData,
-        dummyIAQValues
+        dummyIAQValues,
+
+        weatherStore,
+        weather,
         }
-    }
+    },
+    async mounted() {
+        weatherStore = useWeatherStore();
+        // weather.value = await weatherStore.getCurrentTemperature();
+        weather.value = 21.2;
+    },
 });
 
 

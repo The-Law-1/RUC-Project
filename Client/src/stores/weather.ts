@@ -1,11 +1,10 @@
 import { defineStore } from "pinia";
-import type { QualityTimestamp } from "@/types/QualityTimestamp";
 
-export const useAirQualityStore = defineStore("airQuality", () => {
+export const useWeatherStore = defineStore("weather", () => {
     const backendPath = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
 
-    async function getAirQuality(): Promise<QualityTimestamp[]> {
-        const path = `${backendPath}/measurements/get-all`;
+    async function getCurrentTemperature(): Promise<number> {
+        const path = `${backendPath}/weather`;
 
         const response = await fetch(path, {
             method: "GET",
@@ -16,10 +15,13 @@ export const useAirQualityStore = defineStore("airQuality", () => {
         if (!response.ok) {
             throw new Error("Network response was not ok");
         }
-        return await response.json();
+
+        let payload = await response.json();
+
+        return payload.current_weather.temperature;
     }
 
     return {
-        getAirQuality,
+        getCurrentTemperature,
     }
 });
