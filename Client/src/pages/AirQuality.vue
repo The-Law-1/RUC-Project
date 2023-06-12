@@ -206,6 +206,16 @@ export default defineComponent({
         weatherStore = useWeatherStore();
         // weather.value = await weatherStore.getCurrentTemperature();
         weather.value = 21.2;
+
+        // ici appeler le store pour récupérer les données individuelles
+
+        // convertir les dates en Date
+        // dummyHumidityValues.value.map((value) => {
+        //     value.time = new Date(value.time);
+        //     return value;
+        // }); 
+
+        // créer les data avec getChartData
     },
 });
 
