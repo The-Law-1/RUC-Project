@@ -106,6 +106,7 @@ import sample_humidity from "@/sample_data/humidity.json";
 import sample_pressure from "@/sample_data/pressure.json";
 import sample_iaq from "@/sample_data/iaq.json";
 import { useWeatherStore } from '@/stores/weather';
+import { useAirQualityStore } from '@/stores/AirQuality';
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
@@ -115,6 +116,7 @@ var dummyHumidityValues = ref([] as QualityTimestamp[]);
 var dummyPressureValues = ref([] as QualityTimestamp[]);
 
 var weatherStore = null;
+var airQualityStore = null;
 
 let weather = ref(0);
 
@@ -207,8 +209,11 @@ export default defineComponent({
         // weather.value = await weatherStore.getCurrentTemperature();
         weather.value = 21.2;
 
-        // ici appeler le store pour récupérer les données individuelles
+        airQualityStore = useAirQualityStore();
 
+        // ici appeler le store pour récupérer les données individuelles
+        let data = await airQualityStore.getAirQuality();
+        console.log(data);
         // convertir les dates en Date
         // dummyHumidityValues.value.map((value) => {
         //     value.time = new Date(value.time);
