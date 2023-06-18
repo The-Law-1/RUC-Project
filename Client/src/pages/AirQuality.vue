@@ -6,9 +6,9 @@
 
     <div class="mt-12 text-2xl">
         Your air quality score:
-        <div v-if="dummyIAQValues" class="underline">
+        <div v-if="iaqDataValues && iaqDataValues.length > 0" class="underline">
             <!-- Score -->
-            {{dummyIAQValues[dummyIAQValues.length - 1].value}}
+            {{ iaqDataValues[iaqDataValues.length - 1]["value"] }}
         </div>
         <hr/>
     </div>
@@ -89,6 +89,22 @@
                         responsive: true
                     }"
                     :data="pressureData"
+                />
+            </div>
+        </div>
+
+        <div>
+            <div class=" text-2xl">
+                Gas
+            </div>
+            <!-- Graphique Pressure -->
+            <div class="w-full" v-if="gasData !== undefined">
+                <Bar
+                    id="Gas-chart"
+                    :options="{
+                        responsive: true
+                    }"
+                    :data="gasData"
                 />
             </div>
         </div>
@@ -181,10 +197,14 @@ const getChartData = (valuesArray: QualityTimestamp[], chartLabel:string, lowRan
     }
 }
 
-const CO2Data = ref(getChartData(dummyCO2Values.value, 'CO2', 0, 1000, '#f87979', '#f87979'));
-const tempData = ref(getChartData(dummyTempValues.value, 'Temperature', 12, 30, '#f87979', '#f87979'));
-const humidityData = ref(getChartData(dummyHumidityValues.value, 'Humidity', 30, 60, '#f87979', '#f87979'));
-const pressureData = ref(getChartData(dummyPressureValues.value, 'Pressure', 0, 10000, '#f87979', '#f87979'));
+var CO2Data = ref(getChartData(dummyCO2Values.value, 'CO2', 0, 1000, '#f87979', '#f87979'));
+var tempData = ref(getChartData(dummyTempValues.value, 'Temperature', 12, 30, '#f87979', '#f87979'));
+var humidityData = ref(getChartData(dummyHumidityValues.value, 'Humidity', 30, 60, '#f87979', '#f87979'));
+var pressureData = ref(getChartData(dummyPressureValues.value, 'Pressure', 0, 10000, '#f87979', '#f87979'));
+
+var gasData = ref();
+
+var iaqDataValues = ref([] as QualityTimestamp[]);
 
 console.log(tempData.value);
 
@@ -198,6 +218,9 @@ export default defineComponent({
         tempData,
         humidityData,
         pressureData,
+        iaqDataValues,
+
+        gasData,
         dummyIAQValues,
 
         weatherStore,
@@ -207,20 +230,53 @@ export default defineComponent({
     async mounted() {
         weatherStore = useWeatherStore();
         // weather.value = await weatherStore.getCurrentTemperature();
-        weather.value = 21.2;
+        weather.value = await weatherStore.getCurrentTemperature();
 
         airQualityStore = useAirQualityStore();
 
         // ici appeler le store pour récupérer les données individuelles
-        let data = await airQualityStore.getAirQuality();
-        console.log(data);
-        // convertir les dates en Date
-        // dummyHumidityValues.value.map((value) => {
-        //     value.time = new Date(value.time);
-        //     return value;
-        // }); 
+        let cO2DataValues = await airQualityStore.getCO2();
+        let gasDataValues = await airQualityStore.getGas();
+        let humidityDataValues = await airQualityStore.getHumidity();
+        iaqDataValues.value = await airQualityStore.getIaq();
 
-        // créer les data avec getChartData
+        console.log(iaqDataValues.value);
+
+        let pressureDataValues = await airQualityStore.getPressure();
+        let tempDataValues = await airQualityStore.getTemperature();
+
+        cO2DataValues.map((value) => {
+            value.time = new Date(value.time);
+            return value;
+        });
+
+        gasDataValues.map((value) => {
+            value.time = new Date(value.time);
+            return value;
+        });
+
+        humidityDataValues.map((value) => {
+            value.time = new Date(value.time);
+            return value;
+        });
+
+        pressureDataValues.map((value) => {
+            value.time = new Date(value.time);
+            return value;
+        });
+
+        tempDataValues.map((value) => {
+            value.time = new Date(value.time);
+            return value;
+        });
+
+        CO2Data.value = getChartData(cO2DataValues, 'CO2', 0, 1000, '#f87979', '#f87979');
+        gasData.value = getChartData(gasDataValues, 'gas', 0, 1000, '#f87979', '#f87979');
+        humidityData.value = getChartData(humidityDataValues, 'Humidity', 30, 60, '#f87979', '#f87979');
+        pressureData.value = getChartData(pressureDataValues, 'Pressure', 0, 10000, '#f87979', '#f87979');
+        tempData.value = getChartData(tempDataValues, 'Temperature', 12, 30, '#f87979', '#f87979');
+
+        console.log(gasData.value);
     },
 });
 
